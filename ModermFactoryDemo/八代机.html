@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数字衍生演示台</title>
+    <script src="./js/three.min.js"></script>
+    <script src="./js/OrbitControls.js"></script>
+    <script src="./js/GLTFLoader.js"></script>
+    <script src="./js/DRACOLoader.js"></script>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div id="container">
+        <div id="scene-container"></div>
+        <div id="inventory">
+            <h2>物品栏</h2>
+            <button id="main-model-btn">选择主模型</button>
+            <input type="file" id="main-model-input" accept=".glb,.gltf">
+            <button id="folder-btn">加载物品文件夹</button>
+            <input type="file" id="folder-input" webkitdirectory directory multiple>
+            <div class="inventory-grid" id="inventory-grid"></div>
+        </div>
+    </div>
+    
+    <!-- 控制面板 -->
+    <div class="control-panel">
+        <button class="view-btn" id="top-view-btn">俯视</button>
+        <button class="view-btn" id="front-view-btn">正视</button>
+        
+        <div class="mode-panel">
+            <button class="mode-btn active" id="training-btn">训练模式</button>
+            <button class="mode-btn" id="exam-btn">考试模式</button>
+        </div>
+    </div>
+    
+    <!-- 计时器和记录面板 -->
+    <div class="timer-panel" id="timer-panel" style="display: none;">
+        <div class="timer-display" id="timer">00:00.00</div>
+        <div class="record-list" id="record-list"></div>
+        <button class="reset-btn" id="reset-btn">重置</button>
+    </div>
+    
+    <div id="loading">加载中...</div>
+    
+    <script src="js/utils.js"></script>
+    <script src="js/inventory.js"></script>
+    <script src="js/timer.js"></script>
+    <script src="js/controls.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>

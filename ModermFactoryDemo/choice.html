@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>选择数字衍生体</title>
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Arial', sans-serif;
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background-color: #000;
+            color: #fff;
+            position: relative;
+        }
+
+        .background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('./pics/2.png');
+            background-size: cover;
+            background-position: center;
+            z-index: -1;
+            opacity: 0.5;
+            filter: blur(2px);
+        }
+
+        .carousel-container {
+            position: relative;
+            width: 95%;
+            max-width: 1400px;
+            height: 70vh;
+            overflow: hidden;
+            perspective: 1000px;
+        }
+
+        .carousel {
+            display: flex;
+            width: 100%;
+            height: 100%;
+            position: relative;
+            align-items: flex-end;
+            justify-content: center;
+            transform-style: preserve-3d;
+        }
+
+        .slide {
+            position: absolute;
+            width: 35%;
+            height: 70%;
+            transition: all 0.5s ease;
+            background-size: contain;
+            background-position: center;
+            background-repeat: no-repeat;
+            cursor: pointer;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+            border: 1px solid rgba(0, 255, 255, 0.5);
+            border-radius: 10px;
+            transform-origin: center bottom;
+        }
+
+        .slide-text {
+            position: absolute;
+            bottom: 20px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            font-size: 1.8rem;
+            font-weight: bold;
+            text-shadow: 0 0 10px rgba(0, 255, 255, 0.7),
+                0 0 20px rgba(0, 255, 255, 0.5),
+                0 0 30px rgba(0, 255, 255, 0.3);
+            padding: 10px 20px;
+            background-color: rgba(0, 0, 0, 0.6);
+            border-radius: 5px;
+            margin: 0 auto;
+            width: fit-content;
+            pointer-events: none;
+        }
+
+        .arrow {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 3rem;
+            color: rgba(255, 255, 255, 0.7);
+            cursor: pointer;
+            z-index: 10;
+            padding: 15px 25px;
+            background-color: rgba(0, 0, 0, 0.5);
+            border-radius: 50%;
+            transition: all 0.3s ease;
+            user-select: none;
+        }
+
+        .arrow:hover {
+            color: #0ff;
+            background-color: rgba(0, 255, 255, 0.3);
+            transform: translateY(-50%) scale(1.2);
+        }
+
+        .left-arrow {
+            left: 1%;
+        }
+
+        .right-arrow {
+            right: 1%;
+        }
+
+        .indicator-container {
+            position: absolute;
+            bottom: 500px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: center;
+            z-index: 5;
+        }
+
+        .indicator {
+            display: flex;
+            gap: 10px;
+            padding: 8px 15px;
+            background-color: rgba(0, 0, 0, 0.5);
+            border-radius: 20px;
+        }
+
+        .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.5);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .dot.active {
+            background-color: #0ff;
+            transform: scale(1.3);
+        }
+
+        .loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 1.5rem;
+            color: #0ff;
+        }
+
+        .tooltip {
+            position: absolute;
+            top: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 0.9rem;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+            white-space: nowrap;
+        }
+
+        .slide:hover .tooltip {
+            opacity: 1;
+        }
+
+        @media (max-width: 768px) {
+            .carousel-container {
+                width: 98%;
+                height: 60vh;
+            }
+
+            .slide {
+                width: 50%;
+                height: 60%;
+            }
+
+            .slide-text {
+                font-size: 1.3rem;
+            }
+
+            .arrow {
+                font-size: 2rem;
+                padding: 10px 15px;
+            }
+
+            .left-arrow {
+                left: 2%;
+            }
+
+            .right-arrow {
+                right: 2%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="background"></div>
+    <div class="carousel-container">
+        <div class="loading">加载中...</div>
+        <div class="arrow left-arrow">&#10094;</div>
+        <div class="carousel" id="carousel"></div>
+        <div class="arrow right-arrow">&#10095;</div>
+        <div class="indicator-container">
+            <div class="indicator" id="indicator"></div>
+        </div>
+    </div>
+
+    <script>
+        // 配置项
+        const config = {
+            imageFolder: './pics/tv/',
+            autoSlideInterval: 5000,
+            visibleSlides: 3
+        };
+
+        let currentIndex = 0;
+        let imageFiles = [
+            "八代机.png",
+            "家庭娱乐系统.png",
+            "九代机.png",
+            "流媒体机顶盒.png",
+            "六代机.png",
+            "七代机.png"
+        ];
+        let autoSlideTimer;
+        const carousel = document.getElementById('carousel');
+        const indicator = document.getElementById('indicator');
+        const loading = document.querySelector('.loading');
+
+        // 初始化轮播
+        async function initCarousel() {
+            try {
+                if (imageFiles.length === 0) {
+                    loading.textContent = '未找到图片';
+                    return;
+                }
+
+                createAllSlides();
+                createIndicators();
+                updateCarousel();
+                startAutoSlide();
+                preloadImages();
+                loading.style.display = 'none';
+            } catch (error) {
+                console.error('初始化失败:', error);
+                loading.textContent = '加载失败，请刷新重试';
+            }
+        }
+
+        // 创建所有幻灯片
+        function createAllSlides() {
+            carousel.innerHTML = '';
+
+            imageFiles.forEach((fileName, index) => {
+                const slide = document.createElement('div');
+                slide.className = 'slide';
+                slide.dataset.index = index;
+
+                const img = new Image();
+                img.src = `${config.imageFolder}${fileName}`;
+                img.onload = () => {
+                    slide.style.backgroundImage = `url('${config.imageFolder}${fileName}')`;
+                };
+                img.onerror = () => {
+                    console.error(`图片 ${fileName} 加载失败`);
+                    slide.style.backgroundColor = 'rgba(255, 0, 0, 0.3)';
+                };
+
+                const baseName = fileName.replace(/\.[^/.]+$/, "");
+                const text = document.createElement('div');
+                text.className = 'slide-text';
+                text.textContent = baseName;
+                slide.appendChild(text);
+
+                const tooltip = document.createElement('div');
+                tooltip.className = 'tooltip';
+                tooltip.textContent = '双击进入模拟演示界面';
+                slide.appendChild(tooltip);
+
+                slide.addEventListener('dblclick', () => {
+                    window.location.href = `${baseName}.html`;
+                });
+
+                carousel.appendChild(slide);
+            });
+        }
+
+        // 创建指示点
+        function createIndicators() {
+            indicator.innerHTML = '';
+
+            imageFiles.forEach((_, index) => {
+                const dot = document.createElement('div');
+                dot.className = 'dot';
+                dot.dataset.index = index;
+                dot.addEventListener('click', () => {
+                    goToSlide(index);
+                });
+                indicator.appendChild(dot);
+            });
+        }
+
+        // 更新轮播显示
+        function updateCarousel() {
+            const slides = document.querySelectorAll('.slide');
+            const centerIndex = Math.floor(config.visibleSlides / 2);
+            const totalSlides = imageFiles.length;
+
+            slides.forEach((slide, index) => {
+                const slideIndex = parseInt(slide.dataset.index);
+                let position = (slideIndex - currentIndex + centerIndex) % totalSlides;
+                if (position < 0) position += totalSlides;
+                if (position >= config.visibleSlides) position = -1;
+
+                if (position >= 0) {
+                    const distanceFromCenter = position - centerIndex;
+                    const scale = 1 - Math.abs(distanceFromCenter) * 0.15;
+                    const zIndex = config.visibleSlides - Math.abs(distanceFromCenter);
+                    const opacity = 1 - Math.abs(distanceFromCenter) * 0.2;
+                    const translateX = distanceFromCenter * 80;
+                    const translateY = Math.abs(distanceFromCenter) * 40;
+
+                    slide.style.display = 'block';
+                    slide.style.opacity = opacity;
+                    slide.style.zIndex = zIndex;
+                    slide.style.transform = `translateX(${translateX}%) translateY(${translateY}px) scale(${scale})`;
+                } else {
+                    slide.style.display = 'none';
+                }
+            });
+
+            // 更新指示点
+            const dots = document.querySelectorAll('.dot');
+            dots.forEach((dot, index) => {
+                dot.classList.toggle('active', index === currentIndex);
+            });
+        }
+
+        // 前往指定幻灯片
+        function goToSlide(index) {
+            if (index < 0) index = imageFiles.length - 1;
+            if (index >= imageFiles.length) index = 0;
+
+            currentIndex = index;
+            updateCarousel();
+            resetAutoSlide();
+        }
+
+        // 下一张
+        function nextSlide() {
+            goToSlide(currentIndex + 1);
+        }
+
+        // 上一张
+        function prevSlide() {
+            goToSlide(currentIndex - 1);
+        }
+
+        // 自动轮播
+        function startAutoSlide() {
+            if (autoSlideTimer) clearInterval(autoSlideTimer);
+            autoSlideTimer = setInterval(() => {
+                nextSlide();
+            }, config.autoSlideInterval);
+        }
+
+        // 重置自动轮播计时器
+        function resetAutoSlide() {
+            clearInterval(autoSlideTimer);
+            startAutoSlide();
+        }
+
+        // 预加载图片
+        function preloadImages() {
+            imageFiles.forEach(fileName => {
+                const img = new Image();
+                img.src = `${config.imageFolder}${fileName}`;
+            });
+        }
+
+        // 事件监听
+        document.querySelector('.left-arrow').addEventListener('click', () => {
+            prevSlide();
+            resetAutoSlide();
+        });
+
+        document.querySelector('.right-arrow').addEventListener('click', () => {
+            nextSlide();
+            resetAutoSlide();
+        });
+
+        // 鼠标悬停时暂停自动轮播
+        carousel.addEventListener('mouseenter', () => {
+            clearInterval(autoSlideTimer);
+        });
+
+        // 鼠标离开时恢复自动轮播
+        carousel.addEventListener('mouseleave', () => {
+            resetAutoSlide();
+        });
+
+        // 初始化
+        initCarousel();
+    </script>
+</body>
+
+</html>
