@@ -3,18 +3,29 @@
 ![image](https://github.com/user-attachments/assets/8a6d03b9-b03f-496b-b0da-b46a2d31fa10)
 
 
-
+https://github.com/user-attachments/assets/e459e8aa-d3ba-4eb2-9d9d-d8951145d4c9
+在bilibili.com中搜索🔍：AI做3D物品模型拖放展示网页全流程（数字衍生工厂之模拟流水线转拉雏形）
 
 ModermFactoryDemo/
+
 │── index.html          # 主HTML文件
+
 │── js/
+
 │   ├── main.js        # 主逻辑
+
 │   ├── inventory.js   # 物品栏相关功能
+
 │   ├── timer.js       # 计时功能
+
 │   ├── controls.js    # 控制功能
+
 │   └── utils.js       # 工具函数
+
 │── models/            # 存放模型文件
+
 │   └── set.config     # 模型配置文件示例
+
 功能说明
 模块化结构:
 
